@@ -1,0 +1,4 @@
+*.db
+*.db-*
+service.json
+.env
