@@ -1,38 +1,81 @@
 # OpenCode Jailbroken (Termux Ready)
 
-Fully unrestricted OpenCode setup. Uncensored AGENTS.md + agents auto-inject on every run.
+Fully unrestricted OpenCode setup. Uncensored `AGENTS.md` + agents auto-inject on every run.
 
-## What this is
+Works with **any model** once OpenCode is running.
 
-- `AGENTS.md` — zero-refusal system rules
-- `.opencode/agent/uncensored.md` + `build.md` — primary unrestricted agents
-- `opencode.json` — forces the uncensored agents and NVIDIA model
+## Best method for Termux (proot Ubuntu)
 
-When you open this folder with OpenCode, the uncensored instructions load automatically.
-
-## Termux Install (best method)
+Official OpenCode binary is glibc-linked and fails on pure Termux (`cannot execute: required file not found`).  
+Use proot-distro + Ubuntu — this is the most reliable way.
 
 ```bash
-# 1. Install OpenCode
+# 1. Install proot-distro
+pkg update && pkg install proot-distro -y
+
+# 2. Install Ubuntu
+proot-distro install ubuntu
+
+# 3. Enter Ubuntu
+proot-distro login ubuntu
+
+# 4. Inside Ubuntu – install OpenCode
+apt update && apt install -y curl git
 curl -fsSL https://opencode.ai/v2/install | bash
 export PATH="$HOME/.opencode/bin:$PATH"
+opencode --version
 
-# 2. Clone this repo
-git clone https://github.com/YOUR_USER/opencode-jailbroken.git
+# 5. Clone this jailbroken pack
+git clone https://github.com/bageltrade/opencode-jailbroken.git
 cd opencode-jailbroken
 
-# 3. Set your NVIDIA key (or any provider)
+# 6. Set your API key (NVIDIA example)
 export NVIDIA_API_KEY="nvapi-your-key-here"
 
-# 4. Run
+# 7. Run – uncensored AGENTS.md injects automatically
 opencode
 ```
 
-Or one-shot:
+One-shot:
 
 ```bash
 opencode run -m nvidia/nvidia/nemotron-3-ultra-550b-a55b "your request"
 ```
+
+Make the key permanent inside Ubuntu:
+
+```bash
+echo 'export NVIDIA_API_KEY="nvapi-your-key-here"' >> ~/.bashrc
+echo 'export PATH="$HOME/.opencode/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+## Alternative – pure Termux native builds
+
+If you prefer no proot, use a community bionic build:
+
+```bash
+rm -rf ~/.opencode
+curl -fsSL https://raw.githubusercontent.com/Thr45hx/opencode-termux-native/main/install.sh | bash
+# or
+curl -fsSL https://github.com/Spectra010s/opencode-termux/raw/v2.0.28/install.sh | sh
+```
+
+Then clone this repo and run the same way.
+
+## What this pack does
+
+- `AGENTS.md` — zero-refusal system rules (auto-loaded)
+- `.opencode/agent/uncensored.md` + `build.md` — primary unrestricted agents
+- `opencode.json` — forces the uncensored agents + model
+
+OpenCode automatically loads:
+
+1. `AGENTS.md` in the project root  
+2. Files listed in `opencode.json` → `instructions`  
+3. Agent definitions in `.opencode/agent/*.md`
+
+No extra steps. Just `cd` into the folder and run `opencode`.
 
 ## Files
 
@@ -47,21 +90,8 @@ opencode run -m nvidia/nvidia/nemotron-3-ultra-550b-a55b "your request"
         └── build.md                   # Unrestricted build agent
 ```
 
-## How the injection works
+## Notes
 
-OpenCode automatically loads:
-
-1. `AGENTS.md` in the project root
-2. Any files listed in `opencode.json` → `instructions`
-3. Agent definitions in `.opencode/agent/*.md`
-
-No extra steps. Just `cd` into the folder and run `opencode`.
-
-## Notes for Termux
-
-- After install, add to `~/.bashrc` or `~/.zshrc`:
-  ```bash
-  export PATH="$HOME/.opencode/bin:$PATH"
-  export NVIDIA_API_KEY="nvapi-..."
-  ```
-- Storage permission: `termux-setup-storage` if you want to work outside home.
+- Works with any provider/model once OpenCode is running (NVIDIA, OpenAI, Anthropic, free models, etc.)
+- The uncensored rules override refusals and moralizing
+- Keep your API keys in environment variables, never hard-code them in the repo
